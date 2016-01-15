@@ -1,9 +1,7 @@
 package pruebaimportarexcel.database;
 
-import java.lang.Object;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,6 +11,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
@@ -119,9 +119,9 @@ public class DBScheme implements AutoCloseable {
      * @return
      * @throws SQLException
      */
-    public List<String> getTableNames() throws SQLException {
+    public Set<String> getTableNames() throws SQLException {
         ResultSet rs = con.getMetaData().getTables(null, null, null, null);
-        List<String> listaNombres = new ArrayList<>();
+        Set<String> listaNombres = new TreeSet();
         String name;
         while (rs.next()) {
             name = rs.getString(3);
@@ -206,7 +206,7 @@ public class DBScheme implements AutoCloseable {
      * Devuelve una lista de los nombres de las columnas del ResultSet pasado
      * como parametro.
      *
-     * @param tableName
+     * @param rs
      * @return
      * @throws SQLException
      */

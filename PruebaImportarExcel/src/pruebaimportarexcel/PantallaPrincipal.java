@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -671,7 +672,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         try {
             this.baseDatos.useCatalog((String) this.jComboBox1.getSelectedItem());
-            SwingUtil.initComboBoxModel(this.jComboBox2.getModel(), this.baseDatos.getTableNames());
+            SwingUtil.initComboBoxModel(this.jComboBox2.getModel(), new LinkedList( this.baseDatos.getTableNames() ));
             this.activarDesactivarOpcionesBaseDatos();
             this.jTextField2.setText("Estado: Conectado - " + this.baseDatos.getURL() + " - Esquema: " + this.baseDatos.getCatalogName());
 

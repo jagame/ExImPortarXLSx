@@ -11,6 +11,8 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
+import java.util.Set;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -26,11 +28,30 @@ import pruebaimportarexcel.database.DBScheme;
  */
 public class ExcelUtils {
 
-    Workbook wb;
-    String path;
+    private Workbook wb;
+    private String path;
+    private CellStyle titleStyle;
+    CellStyle dateStyle;
+    private int cnt = 0;
 
     public ExcelUtils(String path) {
         wb = new HSSFWorkbook();
+        this.path = path;
+    }
+    
+    public Workbook getWb() {
+        return wb;
+    }
+
+    public void setWb(Workbook wb) {
+        this.wb = wb;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
         this.path = path;
     }
 
@@ -44,11 +65,12 @@ public class ExcelUtils {
      */
     public static void saveDBtoExcel(DBScheme db, String path) throws IOException, SQLException {
         ExcelUtils eu = new ExcelUtils(path);
+        Set<String> tableNames = db.getTableNames();
         ResultSet rs;
 
-        for (String s : db.getTableNames()) {
+        for (String s : tableNames) {
             rs = db.selectAllFrom(s);
-            eu.saveResultSetToExcelSheet(rs);
+            eu.saveResultSetToExcelSheet(rs, s);
         }
 
         eu.saveWorkbook();
@@ -81,14 +103,15 @@ public class ExcelUtils {
      * @return
      */
     public CellStyle GetTitleStyle() {
-        CellStyle title = wb.createCellStyle();
-        Font fuenteTitle = wb.createFont();
-        fuenteTitle.setBold(true);
-        title.setFont(fuenteTitle);
-        title.setAlignment(CellStyle.ALIGN_CENTER);
-        title.setBorderBottom(CellStyle.BORDER_MEDIUM);
-
-        return title;
+        if( titleStyle == null ){
+            titleStyle = wb.createCellStyle();
+            Font fuenteTitle = wb.createFont();
+            fuenteTitle.setBold(true);
+            titleStyle.setFont(fuenteTitle);
+            titleStyle.setAlignment(CellStyle.ALIGN_CENTER);
+            titleStyle.setBorderBottom(CellStyle.BORDER_MEDIUM);
+        }
+        return titleStyle;
     }
 
     /**
@@ -98,11 +121,12 @@ public class ExcelUtils {
      * @return
      */
     public CellStyle getDateStyle() {
-        CellStyle style = wb.createCellStyle();
-        CreationHelper ch = wb.getCreationHelper();
-        style.setDataFormat(ch.createDataFormat().getFormat("dd/mm/yyyy"));
-
-        return style;
+        if( dateStyle == null ){
+            dateStyle = wb.createCellStyle();
+            CreationHelper ch = wb.getCreationHelper();
+            dateStyle.setDataFormat(ch.createDataFormat().getFormat("dd/mm/yyyy"));
+        }
+        return dateStyle;
     }
 
     /**
@@ -110,12 +134,20 @@ public class ExcelUtils {
      * Sheet dentro de este Workbook
      *
      * @param rs
+     * @param tableName
      * @throws SQLException
      * @throws IOException
      */
-    public void saveResultSetToExcelSheet(ResultSet rs) throws SQLException, IOException {
+    public void saveResultSetToExcelSheet(ResultSet rs, String tableName) throws SQLException, IOException {
         CellStyle headerStyle = GetTitleStyle();
-        Sheet sheet = wb.createSheet(rs.getMetaData().getTableName(1));
+        Sheet sheet;
+        
+        if( tableName.isEmpty() ) tableName = "noName"+cnt++;
+        
+        System.out.println("---------------"+tableName);// que coño pasa aquí?
+        
+        sheet = wb.createSheet(tableName);
+        
         int contaRow = 0;
         Row row = sheet.createRow(contaRow++);
         Cell cell;
@@ -156,43 +188,54 @@ public class ExcelUtils {
         int numColumnas = rs.getMetaData().getColumnCount();
         int type;
         int rsCol;
-        CellStyle dateStyle = getDateStyle();
+        dateStyle = getDateStyle();
         Cell cell;
+        Object value;
         for (int i = 0; i < numColumnas; i++) {
             rsCol = i + 1;
             cell = row.createCell(i);
             type = rs.getMetaData().getColumnType(rsCol);
-            switch (type) {
-                case Types.BIGINT:
-                case Types.BINARY:
-                case Types.DECIMAL:
-                case Types.DOUBLE:
-                case Types.FLOAT:
-                case Types.INTEGER:
-                case Types.NUMERIC:
-                case Types.REAL:
-                case Types.SMALLINT:
-                case Types.TINYINT:
-                    double number = rs.getDouble(rsCol);
-                    cell.setCellValue(number);
-                    break;
-                case Types.DATE:
-                case Types.TIME:
-                case Types.TIMESTAMP:
-                case Types.TIMESTAMP_WITH_TIMEZONE:
-                    Date date = rs.getDate(rsCol);
-                    cell.setCellValue(date);
-                    cell.setCellStyle(dateStyle);
-                    break;
-                case Types.BIT:
-                case Types.BOOLEAN:
-                    boolean bool = rs.getBoolean(rsCol);
-                    cell.setCellValue(bool);
-                    break;
-                default:
-                    String str = rs.getString(rsCol);
-                    cell.setCellValue(str);
-            }
+            value = rs.getObject(rsCol);
+            if( value!=null )
+                switch (type) {
+                    case Types.BIGINT:
+                    case Types.BINARY:
+                    case Types.DECIMAL:
+                    case Types.DOUBLE:
+                    case Types.FLOAT:
+                    case Types.INTEGER:
+                    case Types.NUMERIC:
+                    case Types.REAL:
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
+                        double number = rs.getDouble(rsCol);
+//                        System.out.println("Salida número ------------------------");
+//                        System.out.println(number);
+                        cell.setCellValue(number);
+                        break;
+                    case Types.DATE:
+                    case Types.TIME:
+                    case Types.TIMESTAMP:
+                    case Types.TIMESTAMP_WITH_TIMEZONE:
+                        Date date = rs.getDate(rsCol);
+//                        System.out.println("Salida fecha ------------------------");
+//                        System.out.println(date);
+                        cell.setCellValue(date);
+                        cell.setCellStyle(dateStyle);
+                        break;
+                    case Types.BIT:
+                    case Types.BOOLEAN:
+                        boolean bool = rs.getBoolean(rsCol);
+//                        System.out.println("Salida bit/boolean ------------------------");
+//                        System.out.println(bool);
+                        cell.setCellValue(bool);
+                        break;
+                    default:
+                        String str = rs.getString(rsCol);
+//                        System.out.println("Salida texto ------------------------");
+//                        System.out.println(str);
+                        cell.setCellValue(str);
+                }
         }
     }
 
