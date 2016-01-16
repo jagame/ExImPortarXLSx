@@ -259,7 +259,7 @@ public class DBScheme implements AutoCloseable {
      * @return
      * @throws SQLException
      */
-    public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException {
+    public static AbstractTableModel resultSetToJTable2(ResultSet rs) throws SQLException {
         AbstractTableModel resultado = null;
         Vector<Object> columns = null;
         Vector<List<Object>> allDatas = null;
@@ -294,12 +294,12 @@ public class DBScheme implements AutoCloseable {
         return resultado;
     }
     /**
-     * Alternativa al resultSetToJTable sin usar Vector
+     * Alternativa al resultSetToJTable2 sin usar Vector (es el usado actualmente, lo siento Emilio xD)
      * @param rs
      * @return
      * @throws SQLException 
      */
-    public static AbstractTableModel resultSetToJTable2(ResultSet rs) throws SQLException {
+    public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException {
         AbstractTableModel res;
         int numColumnas;
         int numRows;
@@ -317,8 +317,11 @@ public class DBScheme implements AutoCloseable {
         
         while( rs.next() ){
             for( int i = 1 ; i <= numColumnas ; i++ ){
-                if( conta == 0 )
+                if( conta == 0 ){ // Si no se obtiene la información de la columna beforeFirst pueden ser devueltos valores erroneos
+                    rs.beforeFirst();
                     columnNames[i-1]=rs.getMetaData().getColumnName(i);
+                    rs.first();
+                }
                 allData[conta][i-1] = rs.getObject(i);
             }
             conta++;
