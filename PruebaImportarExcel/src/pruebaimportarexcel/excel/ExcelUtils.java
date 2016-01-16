@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import pruebaimportarexcel.database.DBScheme;
 
 /**
@@ -35,7 +36,10 @@ public class ExcelUtils {
     private int cnt = 0;
 
     public ExcelUtils(String path) {
-        wb = new HSSFWorkbook();
+        if( path.endsWith("xls") )
+            wb = new HSSFWorkbook();
+        else
+            wb = new SXSSFWorkbook();
         this.path = path;
     }
     

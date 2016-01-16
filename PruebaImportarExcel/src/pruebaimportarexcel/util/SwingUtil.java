@@ -117,17 +117,31 @@ public class SwingUtil {
      * @return 
      */
     public static JFileChooser generateExcelFileChooser(){
+        return generateFileChooser("Excel(xls,xlsx)", "xls","xlsx");
+    }
+    /**
+     * Genera un JFileChooser con la descripción pasada que solo muestra los ficheros con las extensiones pasadas. Ejemplo:
+     * si usamos generateFileChooser("Microsoft Word (doc)","doc") solo nos mostraría los ficheros doc de Word
+     * @param description
+     * @param ext
+     * @return 
+     */
+    public static JFileChooser generateFileChooser( String description, String... ext ){
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setFileFilter(new FileFilter() {
             @Override
             public boolean accept(File f) {
-                return f.isDirectory() || f.getName().endsWith(".xls") || f.getName().endsWith(".xlsx");
+                boolean res = f.isDirectory();
+                for( String s : ext ){
+                    res = res || f.getName().endsWith("."+s);
+                }
+                return res;
             }
 
             @Override
             public String getDescription() {
-                return "Excel (xls,xlsx)";
+                return description;
             }
             
         });

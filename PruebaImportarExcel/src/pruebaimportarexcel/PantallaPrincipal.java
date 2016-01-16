@@ -734,10 +734,16 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        String path;
         try {
-            Path sqlFile = Paths.get(System.getProperty("user.home") + System.getProperty("file.separator") + "Excel.sql");
-            Excels.excelToSQL(sqlFile, excelFile, null);
-            JOptionPane.showConfirmDialog(this, "Archivo SQL guardado en: \n" + sqlFile, "Información", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            JFileChooser fileChooser = SwingUtil.generateFileChooser("SQL","sql");
+            int i = fileChooser.showOpenDialog(this);
+            if( i == JFileChooser.APPROVE_OPTION ){
+                path = fileChooser.getSelectedFile().getAbsolutePath();
+                Path sqlFile = Paths.get(path);
+                Excels.excelToSQL(sqlFile, excelFile, null);
+                JOptionPane.showConfirmDialog(this, "Archivo SQL guardado en: \n" + sqlFile, "Información", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            }
         } catch (IOException ex) {
             Logger.getLogger(PantallaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showConfirmDialog(this, "Problemas al exportar al fichero.", "Error - IO", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
@@ -747,10 +753,16 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton7ActionPerformed
 
     private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+        String path;
         try {
-            Path templateDB = Paths.get(System.getProperty("user.home") + System.getProperty("file.separator") + this.baseDatos.getCatalogName() + "Template.xls");
-            ExcelUtils.saveDBtoExcelTemplate(this.baseDatos, templateDB.toString());
-            JOptionPane.showConfirmDialog(this, "Plantilla guardada en: \n" + templateDB, "Información", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            JFileChooser fileChooser = SwingUtil.generateExcelFileChooser();
+            int i = fileChooser.showOpenDialog(this);
+            if( i == JFileChooser.APPROVE_OPTION ){
+                path = fileChooser.getSelectedFile().getAbsolutePath();
+                Path templateDB = Paths.get(path);
+                ExcelUtils.saveDBtoExcelTemplate(this.baseDatos, path);
+                JOptionPane.showConfirmDialog(this, "Plantilla guardada en: \n" + templateDB, "Información", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            }
         } catch (SQLException ex) {
             Logger.getLogger(PantallaPrincipal.class.getName()).log(Level.SEVERE, null, ex);
             JOptionPane.showConfirmDialog(this, "Problemas al obtener la información de la Base de datos.", "Error - BD", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
