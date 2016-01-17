@@ -6,7 +6,6 @@
 package pruebaimportarexcel;
 
 import java.awt.Color;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,7 +14,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +21,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import pruebaimportarexcel.database.DBScheme;
 import pruebaimportarexcel.excel.Excel;
@@ -696,20 +693,18 @@ public class PantallaPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        Vector<Object> columnsName = new Vector();
-        Vector<Vector<Object>> datas = new Vector<>();
+        List<Object> columnsName;
+        List<List<Object>> datas;
 
         Sheet sheet = this.excelFile.getSheet((String) this.jComboBox3.getSelectedItem());
         //Row row = this.excelFile.getRow(sheet, 0);
 
         try {
-            columnsName = (Vector<Object>) GeneralUtils.arrayListToVector(
-                    (ArrayList<Object>) Excels.getColumnsName(
+            columnsName = Excels.getColumnsName(
                             excelFile,
-                            (String) this.jComboBox3.getSelectedItem())
-            );
+                            (String) this.jComboBox3.getSelectedItem());
 
-            datas = (Vector<Vector<Object>>) Excels.getDatasSheet(
+            datas = Excels.getDatasSheet(
                     excelFile,
                     (String) this.jComboBox3.getSelectedItem(),
                     columnsName.size()
@@ -725,7 +720,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         try {
             Instant i1 = Instant.now();
 //            this.jTable2.setModel(DBScheme.resultSetToJTable(this.baseDatos.selectAllFrom((String) this.jComboBox2.getSelectedItem())));
-            this.jTable2.setModel(this.baseDatos.resultSetToJTable((String) this.jComboBox2.getSelectedItem()));
+            this.jTable2.setModel(this.baseDatos.dbTableToJTable((String) this.jComboBox2.getSelectedItem()));
             Instant i2 = Instant.now();
             System.out.println("Tiempo - " + java.time.Duration.between(i1, i2).getNano());
         } catch (SQLException ex) {

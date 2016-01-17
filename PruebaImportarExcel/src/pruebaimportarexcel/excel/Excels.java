@@ -161,10 +161,10 @@ public class Excels {
      * @param colunms
      * @return
      */
-    public static List<Vector<Object>> getDatasSheet(Excel excel, String sheetName, int colunms) {
-        Sheet sheet = null;
+    public static List<List<Object>> getDatasSheet(Excel excel, String sheetName, int colunms) {
+        Sheet sheet;
         int numColumns = 0;
-        List<Vector<Object>> datasheet = new Vector<>();
+        List<List<Object>> datasheet = new ArrayList<>();
 
         Row row = null;
         if (excel != null) {
@@ -173,7 +173,7 @@ public class Excels {
                 numColumns = Excel.getNumCells(excel.getRow(sheet, 0));
 
                 for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
-                    datasheet.add((Vector<Object>) GeneralUtils.arrayListToVector((ArrayList<Object>) Excels.getRowToList(sheet, i, colunms)));
+                    datasheet.add(Excels.getRowToList(sheet, i, colunms));
                 }
 
             }
@@ -186,8 +186,8 @@ public class Excels {
         PrintWriter fileOut = null;
         List<String> sheets = listSheets;
         List<Object> columns;
-        List<Vector<Object>> rows = null;
-        List<String> listInsert = null;
+        List<List<Object>> rows;
+        List<String> listInsert;
 
         try {
             //Creamos el flujo de salida.
@@ -215,11 +215,8 @@ public class Excels {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ex.getClass().getCanonicalName()).log(Level.SEVERE, ex.getLocalizedMessage());
             throw ex;
-        } catch (IOException ex) {
-            Logger.getLogger(ex.getClass().getCanonicalName()).log(Level.SEVERE, ex.getLocalizedMessage());
-            throw ex;
         } finally {
-            fileOut.close();
+            if(fileOut != null) fileOut.close();
         }
 
     }
@@ -227,9 +224,9 @@ public class Excels {
     public static List<String> excelToDB(Excel excel, DBScheme db, List<String> listSheets) {
         List<String> result = new ArrayList<>();        
         List<String> sheets = listSheets;
-        List<Object> columns = null;
-        List<Vector<Object>> rows = null;
-        List<String> listInsert = null;
+        List<Object> columns;
+        List<List<Object>> rows;
+        List<String> listInsert;
         
         //Obtener las paginas.
         sheets = (sheets == null) ? excel.getSheets() : sheets;

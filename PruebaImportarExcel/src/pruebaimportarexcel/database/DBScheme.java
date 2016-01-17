@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import pruebaimportarexcel.util.GeneralUtils;
 
 /**
  * Clase que representa un esquema de una base de datos
@@ -252,54 +250,55 @@ public class DBScheme implements AutoCloseable {
         return result;
     }
 
+//    /**
+//     * Devuelve un modelo de JTable con los datos del ResultSet.
+//     *
+//     * @param rs
+//     * @return
+//     * @throws SQLException
+//     */
+//    public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException {
+//        AbstractTableModel resultado = null;
+//        Vector<Object> columns = null;
+//        Vector<List<Object>> allDatas = null;
+//        Vector<Object> data = null;
+//        
+//        if (rs != null) {
+//            columns = new Vector<>();
+//            allDatas = new Vector<>();
+//            //Llenar Vector de Columns.
+//            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+//                columns.add(rs.getMetaData().getColumnName(i));
+//            }
+//
+//            //Lenar Vector de Datos.
+//            
+//            while (rs.next()) {
+//                data = new Vector<>();
+//                for (Object col : columns) {
+//                    data.add(rs.getObject((String) col));
+//                }
+//
+//                allDatas.add(data);
+//            }
+//        }
+//
+//        if (columns == null) { //Crea un modelo de datos vacio.
+//            resultado = new DefaultTableModel();
+//        } else {
+//            resultado = new DefaultTableModel(allDatas, columns);
+//        }
+//
+//        return resultado;
+//    }
     /**
-     * Devuelve un modelo de JTable con los datos del ResultSet.
-     *
+     * Alternativa al resultSetToJTable sin usar la clase Vector (es el usado actualmente, lo siento Emilio xD)
      * @param rs
      * @return
      * @throws SQLException
+     * @throws NullPointerException Si el ResultSet pasado por parámetro es nulo
      */
-    public static AbstractTableModel resultSetToJTable2(ResultSet rs) throws SQLException {
-        AbstractTableModel resultado = null;
-        Vector<Object> columns = null;
-        Vector<List<Object>> allDatas = null;
-        Vector<Object> data = null;
-        
-        if (rs != null) {
-            columns = new Vector<>();
-            allDatas = new Vector<>();
-            //Llenar Vector de Columns.
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                columns.add(rs.getMetaData().getColumnName(i));
-            }
-
-            //Lenar Vector de Datos.
-            
-            while (rs.next()) {
-                data = new Vector<>();
-                for (Object col : columns) {
-                    data.add(rs.getObject((String) col));
-                }
-
-                allDatas.add(data);
-            }
-        }
-
-        if (columns == null) { //Crea un modelo de datos vacio.
-            resultado = new DefaultTableModel();
-        } else {
-            resultado = new DefaultTableModel(allDatas, columns);
-        }
-
-        return resultado;
-    }
-    /**
-     * Alternativa al resultSetToJTable2 sin usar Vector (es el usado actualmente, lo siento Emilio xD)
-     * @param rs
-     * @return
-     * @throws SQLException 
-     */
-    public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException {
+    public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException{
         AbstractTableModel res;
         int numColumnas;
         int numRows;
@@ -315,22 +314,15 @@ public class DBScheme implements AutoCloseable {
         columnNames = new Object[numColumnas];
         allData = new Object[numRows][numColumnas];
         
+        for( int i = 1 ; i <= numColumnas ; i++ )
+            columnNames[i-1]=rs.getMetaData().getColumnName(i);
         while( rs.next() ){
-            for( int i = 1 ; i <= numColumnas ; i++ ){
-                if( conta == 0 ){ // Si no se obtiene la información de la columna beforeFirst pueden ser devueltos valores erroneos
-                    rs.beforeFirst();
-                    columnNames[i-1]=rs.getMetaData().getColumnName(i);
-                    rs.first();
-                }
+            for( int i = 1 ; i <= numColumnas ; i++ )
                 allData[conta][i-1] = rs.getObject(i);
-            }
             conta++;
         }
         
-        if (columnNames == null) //Crea un modelo de datos vacio.
-            res = new DefaultTableModel();
-        else
-            res = new DefaultTableModel(allData, columnNames);
+        res = new DefaultTableModel(allData, columnNames);
         
         return res;
     }
@@ -342,7 +334,7 @@ public class DBScheme implements AutoCloseable {
      * @return
      * @throws SQLException
      */
-    public AbstractTableModel resultSetToJTable(String tableName) throws SQLException {
+    public AbstractTableModel dbTableToJTable(String tableName) throws SQLException {
         AbstractTableModel resultado;
         ResultSet rs;
 //        Vector<Object> columns;
@@ -366,9 +358,9 @@ public class DBScheme implements AutoCloseable {
         return resultado;
     }
 
-    public static List<String> listToSQLInsert(String table, List<Object> columns, List<Vector<Object>> rows) {
+    public static List<String> listToSQLInsert(String table, List<Object> columns, List<List<Object>> rows) {
         List<String> result = new ArrayList<>();
-        String cabecera = null;
+        String cabecera;
         
         //result.add("// --- INSERTS TO "+table+" ---");
         //Recorrer todas las filas.
@@ -377,10 +369,10 @@ public class DBScheme implements AutoCloseable {
             for (int i = 0; i < row.size(); i++) {
                 cabecera = cabecera + DBScheme.objectToStringSQL(row.get(i),"'");
                 if (i != (row.size() - 1)) {
-                    cabecera = cabecera + ",";
+                    cabecera += ",";
                 }
             }
-            result.add(cabecera = cabecera +");");
+            result.add(cabecera +");");
         }
 
         return result;

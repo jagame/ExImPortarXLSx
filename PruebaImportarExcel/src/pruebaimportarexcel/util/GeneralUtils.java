@@ -6,7 +6,6 @@
 package pruebaimportarexcel.util;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -16,34 +15,32 @@ import java.util.Vector;
  * @author Emilio
  */
 public class GeneralUtils{
-    /**
-     * Pasa un Vector a ArrayList.
-     * @param vector
-     * @return 
-     */
-    public static List<Object> vectorToArrayList(Vector<Object> vector){
-        List<Object> result = new ArrayList<>();
+    
+    public static <T>T[][] listOfListsToArray( List<List<T>> lista ){
+        Object[][] resultado = new Object[lista.size()][];
+        for(int i = 0 ; i < lista.size() ; i++){
+            resultado[i] = lista.get(i).toArray();
+        }  
         
-        for(Object item: vector){
-            result.add(item);
-        }        
-        
-        return result;
-    } 
+        return (T[][])resultado;
+    }
     
     /**
      * Pasa un Vector a ArrayList.
      * @param vector
      * @return 
      */
-    public static List<Object> arrayListToVector(ArrayList<Object> arrayList){
-        List<Object> result = new Vector<>();
-        
-        for(Object item: arrayList){
-            result.add(item);
-        }        
-        
-        return result;
+    public static List<Object> vectorTolist(Vector<Object> vector){
+        return new ArrayList(vector);
+    }
+    
+    /**
+     * Pasa un List a Vector.
+     * @param list
+     * @return 
+     */
+    public static Vector<Object> listToVector(List<Object> list){
+        return new Vector(list);
     } 
     
     /**
@@ -52,18 +49,7 @@ public class GeneralUtils{
      * @return 
      */
     public static Vector<Object> setToVector(Set set){
-        Vector<Object> result = null;
-        Iterator<Object> it = null;
-        
-        if(!set.isEmpty()){
-            result = new Vector<>();
-            it = set.iterator();
-            while(it.hasNext()){
-                result.add(it.next());
-            }
-        }
-        
-        return result;
+        return new Vector(set);
     }
     
     /**
@@ -76,9 +62,7 @@ public class GeneralUtils{
         boolean result = true;
         
         for(Object item: list){
-            if(!item.getClass().getSimpleName().equals(type.getSimpleName())){
-                result = false;
-            }
+            if( ! (result=type.isInstance(item)) ) break;
         }
         
         return result;

@@ -8,7 +8,6 @@ package pruebaimportarexcel.util;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -59,15 +58,20 @@ public class SwingUtil {
     /**
      * Devuelve un model para rellenar una jtable a partir de dos vectores.
      *
-     * @param model
      * @param header
      * @param datas
+     * @return 
      */
-    public static AbstractTableModel initTableModel(Vector<Object> header, Vector<Vector<Object>> datas) {
-        AbstractTableModel model = null;
-
+    public static AbstractTableModel initTableModel(List<Object> header, List<List<Object>> datas) {
+        AbstractTableModel model;
+        Object[][] allData = null;
+        Object[] columNames;
+        
+        if (datas != null)
+            allData = GeneralUtils.listOfListsToArray(datas);
         if (header != null) {
-            model = new DefaultTableModel(datas, header);
+            columNames = header.toArray();
+            model = new DefaultTableModel(allData, columNames);
         } else {
             model = new DefaultTableModel();
         }
@@ -103,8 +107,8 @@ public class SwingUtil {
     /**
      * Activa o desactiva un array de componentes.
      *
+     * @param estado
      * @param componentes
-     * @param opcion
      */
     public static void enabledComponnects(boolean estado, JComponent... componentes) {
         for (JComponent componente : componentes) {
