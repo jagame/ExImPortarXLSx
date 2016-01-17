@@ -14,7 +14,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -26,7 +25,6 @@ import pruebaimportarexcel.database.DBScheme;
 import pruebaimportarexcel.excel.Excel;
 import pruebaimportarexcel.excel.ExcelUtils;
 import pruebaimportarexcel.excel.Excels;
-import pruebaimportarexcel.util.GeneralUtils;
 import pruebaimportarexcel.util.SwingUtil;
 
 /**

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import pruebaimportarexcel.util.GeneralUtils;
 
 /**
  * Clase que representa un esquema de una base de datos
@@ -131,7 +132,7 @@ public class DBScheme implements AutoCloseable {
 
     /**
      * Devuelve un map con el nombre y tipo de todas las columnas de una tabla
-     * dada existente que el actual esquema
+     * dada existente en el actual esquema
      *
      * @param table
      * @return
@@ -205,48 +206,36 @@ public class DBScheme implements AutoCloseable {
      * @param rs
      * @return
      * @throws SQLException
+     * @throws NullPointerException si el ResultSet es null
      */
-    public List<Object> getColumns(ResultSet rs) throws SQLException {
-        List<Object> result = new ArrayList<>();;
+    public static List<String> getColumns(ResultSet rs) throws SQLException {
+        List<String> result = new ArrayList<>();;
 
-        try {
-            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-                result.add(rs.getMetaData().getColumnName(i));
-            }
-        } catch (NullPointerException ex) {
-            result = null;
+        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+            result.add(rs.getMetaData().getColumnName(i));
         }
 
         return result;
     }
 
-    public List<Object> getRow(ResultSet rs) throws SQLException {
+    public static List<Object> getRow(ResultSet rs) throws SQLException {
         List<Object> result = new ArrayList<>();
-        List<Object> columns = null;
+        List<String> columns;
 
-        try {
-            columns = this.getColumns(rs);
-            for (Object col : columns) {
-                result.add(rs.getObject((String) col));
-            }
-        } catch (NullPointerException ex) {
-            result = null;
+        columns = getColumns(rs);
+        for (String col : columns) {
+            result.add(rs.getObject(col));
         }
 
         return result;
     }
 
-    public List<List<Object>> getRows(ResultSet rs) throws SQLException {
+    public static List<List<Object>> getRows(ResultSet rs) throws SQLException {
         List<List<Object>> result = new ArrayList<>();
 
-        try {
-            while (rs.next()) {
-                result.add(this.getRow(rs));
-            }
-        } catch (NullPointerException ex) {
-            result = null;
-        }
-
+        while (rs.next())
+            result.add(getRow(rs));
+        
         return result;
     }
 
@@ -300,27 +289,11 @@ public class DBScheme implements AutoCloseable {
      */
     public static AbstractTableModel resultSetToJTable(ResultSet rs) throws SQLException{
         AbstractTableModel res;
-        int numColumnas;
-        int numRows;
-        int conta = 0;
         Object[] columnNames;
         Object[][] allData;
         
-        rs.last();
-        numColumnas = rs.getMetaData().getColumnCount();
-        numRows = rs.getRow();
-        rs.beforeFirst();
-        
-        columnNames = new Object[numColumnas];
-        allData = new Object[numRows][numColumnas];
-        
-        for( int i = 1 ; i <= numColumnas ; i++ )
-            columnNames[i-1]=rs.getMetaData().getColumnName(i);
-        while( rs.next() ){
-            for( int i = 1 ; i <= numColumnas ; i++ )
-                allData[conta][i-1] = rs.getObject(i);
-            conta++;
-        }
+        allData = GeneralUtils.listOfListsToArray( getRows(rs) );
+        columnNames = getColumns(rs).toArray();
         
         res = new DefaultTableModel(allData, columnNames);
         
@@ -337,23 +310,9 @@ public class DBScheme implements AutoCloseable {
     public AbstractTableModel dbTableToJTable(String tableName) throws SQLException {
         AbstractTableModel resultado;
         ResultSet rs;
-//        Vector<Object> columns;
-//        Vector<Vector<Object>> allDatas;
-//
-//        //Inicializacion de las difetenes varables locales.
+        
         rs = this.selectAllFrom(tableName);
-//        columns = (Vector<Object>) GeneralUtils.arrayListToVector((ArrayList<Object>) this.getColumns(rs));
-//        allDatas = new Vector<>();
-//
-//        for (List<Object> item : this.getRows(rs)) {
-//            allDatas.add((Vector<Object>) GeneralUtils.arrayListToVector((ArrayList<Object>) item));
-//        }
-//
-//        if (columns == null) { //Crea un modelo de datos vacio.
-//            resultado = new DefaultTableModel();
-//        } else {
-//            resultado = new DefaultTableModel(allDatas, columns);
-//        }
+
         resultado = resultSetToJTable(rs);
         return resultado;
     }
